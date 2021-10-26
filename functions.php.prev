@@ -1,0 +1,55 @@
+<?php 
+
+global $lookup_state, $lookup_districts;
+
+add_action( 'wp_enqueue_scripts', 'my_enqueue_assets' ); 
+
+function my_enqueue_assets() { 
+
+    wp_enqueue_style( 'parent-style', get_template_directory_uri().'/style.css' ); 
+
+} 
+
+/* 
+add_action( 'gform_after_submission', 'find_district', 10, 2 );
+function find_district( $entry, $form ) {
+ 
+    
+	$zipcode = rgar( $entry, '1.5' );
+	if (!empty($zipcode) ) {
+	  
+       $newdb = new wpdb('lookitup', 'e>aT6aool1Fc', 'find-district', 'localhost');
+       $newdb->show_errors(); 
+       $place = $newdb->get_row( 'SELECT * FROM ziplisting WHERE zipcode = ' . $zipcode );
+       echo 'state ' . $place->state . ' and ' . $place->district;
+       $lookup_state = $place->state;
+       $lookup_districts  = str_replace( ',', '|', $place->district);
+
+		echo 'state ' . $lookup_state . ' and ' . $lookup_districts;	   
+   }
+   
+   $request = new WP_Http();
+   $response = $request->get( 'https://voteclimatepac.org/results', array() );
+   GFCommon::log_debug( 'gform_after_submission: response => ' . print_r( $response, true ) );
+}
+*/
+
+add_filter( 'gform_confirmation_2', 'custom_confirmation', 10, 4 );
+function custom_confirmation( $confirmation, $form, $entry ) {
+    
+	$zipcode = rgar( $entry, '1.5' );
+	if (!empty($zipcode) ) {
+	  
+       $newdb = new wpdb('lookitup', 'e>aT6aool1Fc', 'find-district', 'localhost');
+       $newdb->show_errors(); 
+       $place = $newdb->get_row( 'SELECT * FROM ziplisting WHERE zipcode = ' . $zipcode );
+       echo 'state ' . $place->state . ' and ' . $place->district;
+       $lookup_state = $place->state;
+       $lookup_districts  = str_replace( ',', '|', $place->district);
+		echo 'state ' . $lookup_state . ' and ' . $lookup_districts;	   
+   }
+	
+	$confirmation[redirect] .= "?state=" . $place->state . "&district=" . $lookup_districts;
+	    
+    return $confirmation;
+}
